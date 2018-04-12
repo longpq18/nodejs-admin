@@ -6,6 +6,25 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 var User = require('./../models/user.model');
+var jwt = require('jsonwebtoken');
+
+// Login
+router.post('/login', function( req, res ) {
+    const user = {
+      email: req.body.email,
+      password: req.body.password
+    }
+
+    const token = jwt.sign({user: user}, 'sawadikapp')
+    User.find( user, ( err, result ) => {
+      console.log(result)
+      if(result.length > 0) {
+        return res.status(200).send({success: true, token: token})
+      } else {
+        return res.status(500).send({success: false})
+      }
+    })
+})
 
 // CREATES A NEW USER
 router.post('/create', function (req, res) {
@@ -27,7 +46,7 @@ router.post('/create', function (req, res) {
 });
 
 // RETURNS ALL THE USERS IN THE DATABASE
-router.get('/', function (req, res) {
+router.get('/lists', function (req, res) {
     User.find({}, function (err, users) {
         if (err) return res.status(500).send("There was a problem finding the users.");
         res.status(200).send(users);
