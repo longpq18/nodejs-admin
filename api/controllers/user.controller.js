@@ -127,7 +127,34 @@ router.post('/search/:email', function(req, res) {
 })
 
 // verify email
-router.post('/verify_email/:code', (req, res) => {
+router.post('/verify_email', function(req, res) {
+  var token = req.body.token
+  var code = req.body.code
+
+  jwt.verify(token, 'sawadikapp', function(err, data) {
+    if (err) {
+      return res.status(500).send('Token is not correct')
+    } else {
+      console.log('email: ', data.user.email)
+      var email = data.user.email
+      User.find({email: email, emailVerifyCode: code}, (err, response) => {
+        console.log(response)
+        if(response.length === 0) {
+          return res.status(500).send({result: 'The code is not correct'})
+        }
+
+        if(err) {
+          return res.status(500).send('The system error')
+        }
+
+        return res.status(200).send({result: 'Verified'})
+
+      })
+      // res.json({
+      //   description: 'Protected information. Congrats!'
+      // });
+    }
+  });
 
 })
 module.exports = router;
