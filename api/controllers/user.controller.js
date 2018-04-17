@@ -111,9 +111,19 @@ router.put('/update/:id', function (req, res) {
     });
 });
 
+// Get user info
+router.get('/:id', function(req, res) {
+    User.find({_id: req.params.id}, (err, user) => {
+      if(err) {
+        return res.status(500).send('There was a problem found the user')
+      }
+      res.status(200).send({result: user})
+    })
+})
+
 // Search by email
-router.post('/search/:email', function(req, res) {
-    User.find({email: req.body.email}, (err, user) => {
+router.get('/search/:email', function(req, res) {
+    User.find({email: req.params.email}, (err, user) => {
       if(user.length == 0) {
         return res.status(404).send('No user found')
       }
@@ -135,7 +145,6 @@ router.post('/verify_email', function(req, res) {
     if (err) {
       return res.status(500).send('Token is not correct')
     } else {
-      console.log('email: ', data.user.email)
       var email = data.user.email
       User.find({email: email, emailVerifyCode: code}, (err, response) => {
         console.log(response)
@@ -150,9 +159,6 @@ router.post('/verify_email', function(req, res) {
         return res.status(200).send({result: 'Verified'})
 
       })
-      // res.json({
-      //   description: 'Protected information. Congrats!'
-      // });
     }
   });
 
